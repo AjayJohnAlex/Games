@@ -8,20 +8,37 @@ pygame.display.set_caption("Assassin Game")
 
 clock = pygame.time.Clock()
 
-x = 50
-y = 400
-width = 64
-height = 64
-vel = 5
 
-screen_width = 500
+class player(object):
 
-is_Jump = False
-jumpCount = 10
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.vel = 5
+        self.is_Jump = False
+        self.jumpCount = 10
+        self.screen_width = 500
+        self.right = False
+        self.left = False
+        self.walkCount = 0
 
-left = False
-right = False
-walkCount = 0
+    def draw(self, win):
+        if self.walkCount + 1 >= 27:
+            self.walkCount = 0
+
+        if self.left:
+            win.blit(walkLeft[self.walkCount // 3], (self.x, self.y))
+            self.walkCount += 1
+
+        elif self.right:
+            win.blit(walkRight[self.walkCount // 3], (self.x, self.y))
+            self.walkCount += 1
+
+        else:
+            win.blit(char, (self.x, self.y))
+
 
 # loading multiple images
 # This goes outside the while loop, near the top of the program
@@ -36,30 +53,17 @@ char = pygame.image.load('Game/standing.png')
 
 
 def redrawGameWindow():
-    global walkCount
-
     win.blit(bg, (0, 0))
 
     # draw our charact er
     # every character in pygame is a surface and it lies on the window and colors all are in RGB
-    if walkCount + 1 >= 27:
-        walkCount = 0
-
-    if left:
-        win.blit(walkLeft[walkCount // 3], (x, y))
-        walkCount += 1
-
-    elif right:
-        win.blit(walkRight[walkCount // 3], (x, y))
-        walkCount += 1
-
-    else:
-        win.blit(char, (x, y))
-
+    man.draw(win)
     # to show you need to refresh the window
     pygame.display.update()
 # all pygame has a main loop which checks for collition , mouse events , movements etc
 
+
+man = player(300, 410, 64, 64)
 
 run = True
 while run:
@@ -71,33 +75,33 @@ while run:
 
     keys = pygame.key.get_pressed()
 
-    if keys[pygame.K_LEFT] and x > vel:
-        x -= vel
-        left = True
-        right = False
+    if keys[pygame.K_LEFT] and man.x > man.vel:
+        man.x -= man.vel
+        man.left = True
+        man.right = False
 
-    if keys[pygame.K_RIGHT] and x < screen_width - width - vel:
-        x += vel
-        right = True
-        left = False
+    if keys[pygame.K_RIGHT] and man.x < man.screen_width - man.width - man.vel:
+        man.x += man.vel
+        man.right = True
+        man.left = False
 
     else:
-        right = False
+        man.right = False
 
-    if not(is_Jump):
+    if not(man.is_Jump):
         if keys[pygame.K_SPACE]:
-            is_Jump = True
+            man.is_Jump = True
     else:
-        if jumpCount >= -10:
+        if man.jumpCount >= -10:
             neg = 1
-            if jumpCount < 0:
+            if man.jumpCount < 0:
                 neg = -1
-            y -= (jumpCount ** 2) * 0.5 * neg
-            jumpCount -= 1
+            man.y -= (man.jumpCount ** 2) * 0.5 * neg
+            man.jumpCount -= 1
 
         else:
-            is_Jump = False
-            jumpCount = 10
+            man.is_Jump = False
+            man.jumpCount = 10
 
     # fill the screen before drawing the character
     redrawGameWindow()
