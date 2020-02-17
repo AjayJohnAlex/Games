@@ -1,7 +1,6 @@
 import pygame
 pygame.init()
 
-
 win = pygame.display.set_mode((500, 480))
 
 pygame.display.set_caption("Assassin Game")
@@ -14,7 +13,6 @@ clock = pygame.time.Clock()
 
 music = pygame.mixer.music.load('Game/music.mp3')
 pygame.mixer.music.play(-1)
-
 
 # loading multiple images
 # This goes outside the while loop, near the top of the program
@@ -68,7 +66,9 @@ class player(object):
         # pygame.draw.rect(win, (255, 0, 0), self.hitbox, 2)
 
     def hit(self):
-        self.x = 50
+        self.is_Jump = False
+        self.jumpCount = 10
+        self.x = 10
         self.y = 410
         self.walkCount = 0
         font1 = pygame.font.SysFont('comicsans', 100)
@@ -123,7 +123,7 @@ class enemy(object):
         self.walkCount = 0
         self.vel = 3
         self.hitbox = (self.x + 17, self.y + 2, 31, 57)
-        self.health = 10
+        self.health = 100
         self.visible = True
 
     def draw(self, win):
@@ -145,7 +145,7 @@ class enemy(object):
 
             pygame.draw.rect(win, (0, 128, 0),
                              (self.hitbox[0], self.hitbox[1] - 20,
-                              50 - (5 * (10 - self.health)), 10))
+                              50 - (0.5 * (100 - self.health)), 10))
 
             self.hitbox = (self.x + 17, self.y + 2, 31, 57)
         # pygame.draw.rect(win, (255, 0, 0), self.hitbox, 2)
@@ -183,7 +183,7 @@ def redrawGameWindow():
         bullet.draw(win)
     goblin.draw(win)
     text = font.render('score: ' + str(score), 1, (0, 0, 0))
-    win.blit(text, (390, 10))
+    win.blit(text, (350, 10))
     # to show you need to refresh the window
     pygame.display.update()
 # all pygame has a main loop which checks for collition , mouse events , movements etc
@@ -206,14 +206,16 @@ while run:
     if shoot_ones > 3:
         shoot_ones = 0
 
-    # checking if the goblin and the man are colliding or not
-    #  y co ordinate
-    if man.hitbox[1] < goblin.hitbox[1] + goblin.hitbox[3] and man.hitbox[1] + man.hitbox[3] > goblin.hitbox[1]:
-        # x co orfinate
-        if man.hitbox[0] + man.hitbox[2] > goblin.hitbox[0] and man.hitbox[0] < goblin.hitbox[0] + goblin.hitbox[2]:
-            # hit_sound.play()
-            man.hit()
-            score -= 5
+     # only collide if goblin is visible
+    if goblin.visible:
+        # checking if the goblin and the man are colliding or not
+        #  y co ordinate
+        if man.hitbox[1] < goblin.hitbox[1] + goblin.hitbox[3] and man.hitbox[1] + man.hitbox[3] > goblin.hitbox[1]:
+            # x co orfinate
+            if man.hitbox[0] + man.hitbox[2] > goblin.hitbox[0] and man.hitbox[0] < goblin.hitbox[0] + goblin.hitbox[2]:
+                # hit_sound.play()
+                man.hit()
+                score -= 5
 
     for event in pygame.event.get():  # list of all events
         if event.type == pygame.QUIT:
@@ -222,13 +224,14 @@ while run:
     for bullet in bullets:
         # checking if the bullets are hitting the enemy
         #  y co ordinate
-        if bullet.y - bullet.radius < goblin.hitbox[1] + goblin.hitbox[3] and bullet.y + bullet.radius > goblin.hitbox[1]:
-            # x co orfinate
-            if bullet.x + bullet.radius > goblin.hitbox[0] and bullet.x - bullet.radius < goblin.hitbox[0] + goblin.hitbox[2]:
-                # hit_sound.play()
-                goblin.hit()
-                score += 1
-                bullets.pop(bullets.index(bullet))
+        if goblin.visible:
+            if bullet.y - bullet.radius < goblin.hitbox[1] + goblin.hitbox[3] and bullet.y + bullet.radius > goblin.hitbox[1]:
+                # x co orfinate
+                if bullet.x + bullet.radius > goblin.hitbox[0] and bullet.x - bullet.radius < goblin.hitbox[0] + goblin.hitbox[2]:
+                    # hit_sound.play()
+                    goblin.hit()
+                    score += 1
+                    bullets.pop(bullets.index(bullet))
 
         if bullet.x < 500 and bullet.x > 0:
             bullet.x += bullet.vel  # setting the bullet speed
