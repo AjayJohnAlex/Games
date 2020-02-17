@@ -8,6 +8,13 @@ pygame.display.set_caption("Assassin Game")
 
 clock = pygame.time.Clock()
 
+# for sounds
+# bullet_sound = pygame.mixer.Sound('Game/bullet.wav')
+# hit_sound = pygame.mixer.Sound('Game/hits.wav')
+
+music = pygame.mixer.music.load('Game/music.mp3')
+pygame.mixer.music.play(-1)
+
 
 # loading multiple images
 # This goes outside the while loop, near the top of the program
@@ -59,6 +66,23 @@ class player(object):
 
         self.hitbox = (self.x + 17, self.y + 11, 29, 52)
         # pygame.draw.rect(win, (255, 0, 0), self.hitbox, 2)
+
+    def hit(self):
+        self.x = 50
+        self.y = 410
+        self.walkCount = 0
+        font1 = pygame.font.SysFont('comicsans', 100)
+        text = font1.render('-5', 1, (255, 0, 0))
+        win.blit(text, (250 - (text.get_width() / 2), 200))
+        pygame.display.update()
+        i = 0
+        while i < 300:
+            pygame.time.delay(10)
+            i += 1
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    i = 301
+                    pygame.quit()
 
 # for the projectile
 
@@ -182,6 +206,15 @@ while run:
     if shoot_ones > 3:
         shoot_ones = 0
 
+    # checking if the goblin and the man are colliding or not
+    #  y co ordinate
+    if man.hitbox[1] < goblin.hitbox[1] + goblin.hitbox[3] and man.hitbox[1] + man.hitbox[3] > goblin.hitbox[1]:
+        # x co orfinate
+        if man.hitbox[0] + man.hitbox[2] > goblin.hitbox[0] and man.hitbox[0] < goblin.hitbox[0] + goblin.hitbox[2]:
+            # hit_sound.play()
+            man.hit()
+            score -= 5
+
     for event in pygame.event.get():  # list of all events
         if event.type == pygame.QUIT:
             run = False
@@ -192,7 +225,7 @@ while run:
         if bullet.y - bullet.radius < goblin.hitbox[1] + goblin.hitbox[3] and bullet.y + bullet.radius > goblin.hitbox[1]:
             # x co orfinate
             if bullet.x + bullet.radius > goblin.hitbox[0] and bullet.x - bullet.radius < goblin.hitbox[0] + goblin.hitbox[2]:
-
+                # hit_sound.play()
                 goblin.hit()
                 score += 1
                 bullets.pop(bullets.index(bullet))
@@ -205,6 +238,7 @@ while run:
     keys = pygame.key.get_pressed()
 #  the and shoot_ones == 0 is to stop spaming of the space bar
     if keys[pygame.K_SPACE] and shoot_ones == 0:
+        # bullet_sound.play()
         if man.left:
             facing = -1
         else:
